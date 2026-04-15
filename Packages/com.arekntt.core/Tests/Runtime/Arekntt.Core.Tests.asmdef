@@ -1,0 +1,11 @@
+{
+    "name": "Arekntt.Core.Tests",
+    "references": [
+        "Arekntt.Core"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": []
+}

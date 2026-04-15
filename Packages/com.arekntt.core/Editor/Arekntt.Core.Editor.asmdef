@@ -1,0 +1,10 @@
+{
+    "name": "Arekntt.Core.Editor",
+    "references": [
+      "Arekntt.Core"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}

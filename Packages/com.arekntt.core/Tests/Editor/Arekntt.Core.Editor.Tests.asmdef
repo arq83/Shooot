@@ -1,0 +1,14 @@
+{
+    "name": "Arekntt.Core.Editor.Tests",
+    "references": [
+        "Arekntt.Core.Editor",
+        "Arekntt.Core"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}
