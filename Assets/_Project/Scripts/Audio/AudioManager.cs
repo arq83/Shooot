@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
@@ -39,7 +39,7 @@ public class AudioManager : MonoBehaviour
     //public void PlayShoot()
     //{
     //    var clip = GenerateShoot();
-    //    Debug.Log($"PlayShoot � clip: {clip != null}, sfxSource: {sfxSource != null}, volume: {sfxVolume}");
+    //    Debug.Log($"PlayShoot — clip: {clip != null}, sfxSource: {sfxSource != null}, volume: {sfxVolume}");
     //    sfxSource.PlayOneShot(clip, sfxVolume);
     //}
     //public void PlayHit() => sfxSource.PlayOneShot(GenerateHit(), sfxVolume);
@@ -51,8 +51,9 @@ public class AudioManager : MonoBehaviour
     {
         sfxSource.volume = sfxVolume;
         //var clip = GenerateShoot();
-        //Debug.Log($"PlayShoot � clip: {clip != null}, sfxSource: {sfxSource != null}, volume: {sfxVolume}");
+        //Debug.Log($"PlayShoot — clip: {clip != null}, sfxSource: {sfxSource != null}, volume: {sfxVolume}");
         sfxSource.PlayOneShot(GenerateShoot());
+        MarkovBassSequencer.Instance?.TriggerFromShot();
     }
 
     public void PlayHit()
@@ -93,19 +94,6 @@ public class AudioManager : MonoBehaviour
 
     // --- GENERATORY ---
 
-    private AudioClip GenerateShoot()
-    {
-        int sample = 4410;
-        float[] data = new float[sample];
-        for (int i = 0; i < sample; i++)
-        {
-            float t = (float)i / sample;
-            float freq = Mathf.Lerp(880f, 220f, t);
-            data[i] = Mathf.Sin(2 * Mathf.PI * freq * t) * (1f - t);
-        }
-        return MakeClip(data, sample);
-    }
-
     private AudioClip GenerateHit()
     {
         int sample = 2205;
@@ -119,15 +107,54 @@ public class AudioManager : MonoBehaviour
         return MakeClip(data, sample);
     }
 
-    private AudioClip GenerateDie()
+    private AudioClip GenerateShoot()
     {
-        int sample = 11025;
+        int sample = 4410; // ~100ms - krótszy, bardziej agresywny
         float[] data = new float[sample];
         for (int i = 0; i < sample; i++)
         {
             float t = (float)i / sample;
-            float freq = Mathf.Lerp(440f, 55f, t * t);
-            data[i] = Mathf.Sin(2 * Mathf.PI * freq * t) * (1f - t);
+
+            // "zap" - zaczyna od szumu który szybko przechodzi w ton
+            float noise = (UnityEngine.Random.value * 2f - 1f);
+            float freq = Mathf.Lerp(600f, 80f, t * t * t); // gwałtowny zjazd
+            float tone = Mathf.Sin(2 * Mathf.PI * freq * t);
+
+            // na początku dominuje szum, potem ton
+            float noiseMix = Mathf.Pow(1f - t, 3f);
+            float toneMix = 1f - noiseMix;
+
+            float env = Mathf.Pow(1f - t, 2f);
+            data[i] = (noise * noiseMix + tone * toneMix) * env * 0.7f;
+        }
+        return MakeClip(data, sample);
+    }
+
+    private AudioClip GenerateDie()
+    {
+        int sample = 22050; // ~500ms
+        float[] data = new float[sample];
+        for (int i = 0; i < sample; i++)
+        {
+            float t = (float)i / sample;
+
+            // dramatyczny zjazd przez Am pentatonikę w dół
+            float[] freqs = { 329.63f, 261.63f, 220f, 164.81f, 110f }; // E4→C4→A3→E3→A2
+            int step = Mathf.Min((int)(t * freqs.Length), freqs.Length - 1);
+            float freq = freqs[step];
+
+            // lekkie detune dla dramatyzmu
+            float detune = 1f - t * 0.04f;
+            float sine = Mathf.Sin(2 * Mathf.PI * freq * detune * t);
+
+            // subharmonic — dodaje ciężkości
+            float sub = Mathf.Sin(2 * Mathf.PI * freq * 0.5f * detune * t) * 0.4f;
+
+            // noise sweep — elektryczny trzask na początku
+            float noise = (UnityEngine.Random.value * 2f - 1f) * Mathf.Pow(1f - t, 3f) * 0.3f;
+
+            float env = Mathf.Pow(1f - t, 0.6f); // wolne zamieranie
+            data[i] = (sine + sub + noise) * env * 0.5f;
         }
         return MakeClip(data, sample);
     }
@@ -160,17 +187,19 @@ public class AudioManager : MonoBehaviour
     private AudioClip GenerateMusic()
     {
         int sampleRate = 44100;
-        int duration = sampleRate * 4; // 4 sekundy loopa
+        int duration = sampleRate * 4;
         float[] data = new float[duration];
 
-        int[] notes = { 220, 277, 330, 415 }; // Am pentatonika
+        // Am pentatonika — te same nuty co bas, oktawa wyżej
+        float[] notes = { 220f, 261.63f, 293.66f, 329.63f, 392.00f };
+        //                 A3     C4       D4       E4       G4
 
         for (int i = 0; i < duration; i++)
         {
             float t = (float)i / sampleRate;
             int noteIndex = (int)(t * 2) % notes.Length;
             float freq = notes[noteIndex];
-            float env = Mathf.Sin(Mathf.PI * ((t * 2) % 1f)); // envelope per nuta
+            float env = Mathf.Sin(Mathf.PI * ((t * 2) % 1f));
             data[i] = Mathf.Sin(2 * Mathf.PI * freq * t) * env * 0.15f;
         }
         return MakeClip(data, duration);
