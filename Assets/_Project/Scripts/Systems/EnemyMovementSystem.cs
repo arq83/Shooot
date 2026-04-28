@@ -50,6 +50,36 @@ public class EnemyMovementSystem : ISystem
                     enemy.AttackTimer = enemy.AttackCooldown;
                 }
             }
+
+            // strzelanie z dystansu
+            if (enemy.CanShoot)
+            {
+                enemy.ShootTimer -= Time.deltaTime;
+
+                float distToPlayer = Vector2.Distance(enemy.Position, player.Position);
+
+                Debug.Log($"[Enemy] CanShoot=true dist={distToPlayer:F2} range={enemy.ShootRange} timer={enemy.ShootTimer:F2}");
+
+                if (distToPlayer < enemy.ShootRange && enemy.ShootTimer <= 0f)
+                {
+                    Vector2 dir = (player.Position - enemy.Position).normalized;
+                    // lekki spread ¿eby nie by³o impossible to dodge
+                    float spread = Random.Range(-0.15f, 0.15f);
+                    dir = new Vector2(dir.x + spread, dir.y + spread).normalized;
+
+                    queue.Enqueue(new EnemyShootEvent(enemy.Position, dir));
+                    enemy.ShootTimer = enemy.ShootCooldown;
+                }
+
+                // strzelaj¹cy wróg trzyma dystans zamiast siê zbli¿aæ
+                if (distToPlayer < enemy.ShootRange * 0.6f)
+                {
+                    Debug.Log("[Enemy] STRZA£!");
+                    Vector2 retreatDir = (enemy.Position - player.Position).normalized;
+                    enemy.Position += retreatDir * enemy.Speed * 0.5f * Time.deltaTime;
+                    continue; // pomiñ normalny ruch
+                }
+            }
         }
 
         for (int i = 0; i < enemies.Count; i++)

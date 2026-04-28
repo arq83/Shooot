@@ -37,6 +37,7 @@ public class DamageSystem : ISystem
                 if (hit.Enemy.Health <= 0)
                 {
                     AudioManager.Instance?.PlayDie();
+                    AudioManager.Instance?.PlayKillConfirm();
                     state.Score += 10;
                     HighscoreSystem.Submit(state.Score);
                     GameObject.Destroy(hit.Enemy.View.gameObject);

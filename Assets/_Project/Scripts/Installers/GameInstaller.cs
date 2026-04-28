@@ -16,6 +16,7 @@ public class GameInstaller : MonoBehaviour, ICoroutineRunner // DODAJ interfejs
     public PowerUpView powerUpPrefab;
     public PlayerConfig playerConfig;
     public List<EnemyConfig> enemyConfigs;
+    private List<EnemyProjectileRuntimeData> enemyProjectiles = new();
 
     // USUÑ Instance - nie potrzebujemy go ju¿
 
@@ -52,6 +53,7 @@ public class GameInstaller : MonoBehaviour, ICoroutineRunner // DODAJ interfejs
             new EnemyMovementSystem(enemies, playerData, queue, gameState),
             new ShootingSystem(queue, playerData, gameState),
             new ProjectileSystem(queue, projectilePrefab, gameState, projectiles, enemies, hitEffectPrefab),
+            new EnemyProjectileSystem(queue, projectilePrefab, playerData, gameState),
             new DamageSystem(queue, enemies, gameState, powerUps, powerUpPrefab),
             new PowerUpSystem(powerUps, playerData),
             new PlayerDamageSystem(queue, playerData, gameState),

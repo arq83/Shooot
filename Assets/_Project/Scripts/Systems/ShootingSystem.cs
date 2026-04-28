@@ -33,9 +33,12 @@ public class ShootingSystem : ISystem
                 Debug.Log("AudioManager instance: " + (AudioManager.Instance == null ? "NULL" : "OK"));
                 Debug.Log("MuzzleFlash Show called at: " + player.Position);
                 MuzzleFlash.Show(player.Position, direction);
-                AudioManager.Instance?.PlayShoot();
+                //AudioManager.Instance?.PlayShoot();
+                //AudioManager.Instance.PlayShootQuantized();
+                //AudioManager.Instance.PlayShootGroove();
+                AudioManager.Instance.PlayShootRhythmic();
                 // triggeruj nutê basu
-                MarkovBassSequencer.Instance?.TriggerFromShot();
+                //MarkovBassSequencer.Instance?.TriggerFromShot();
 
                 Debug.Log("Spawn projectile event");
             }

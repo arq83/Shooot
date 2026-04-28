@@ -24,6 +24,13 @@ public class PowerUpSystem : ISystem
                 player.Heal(1);
                 AudioManager.Instance?.PlayPickup();
 
+                // sprawdŸ czy HP wróci³o powy¿ej progu
+                float healthPercent = (float)player.Health / player.MaxHealth;
+                if (healthPercent > 0.3f)
+                    AudioManager.Instance?.StopHeartbeat();
+                else
+                    AudioManager.Instance?.StartHeartbeat(healthPercent); // odœwie¿ tempo
+
                 GameObject.Destroy(p.View.gameObject);
                 powerUps.RemoveAt(i);
 

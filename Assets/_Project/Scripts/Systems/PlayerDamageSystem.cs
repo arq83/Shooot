@@ -17,7 +17,7 @@ public class PlayerDamageSystem : ISystem
     public void Update()
     {
         if (state.IsPaused) return;
-        
+
         foreach (var e in queue.GetEvents())
         {
             if (e is PlayerHitEvent hit)
@@ -26,9 +26,20 @@ public class PlayerDamageSystem : ISystem
 
                 player.ApplyDamage(hit.Damage);
 
+                float healthPercent = (float)player.Health / player.MaxHealth;
+
                 if (player.Health <= 0)
                 {
+                    AudioManager.Instance?.StopHeartbeat();
                     queue.EnqueueImmediate(new GameOverEvent());
+                }
+                else if (healthPercent <= 0.3f) // poni¿ej 30% HP
+                {
+                    AudioManager.Instance?.StartHeartbeat(healthPercent);
+                }
+                else
+                {
+                    AudioManager.Instance?.StopHeartbeat(); // wyleczony powy¿ej 30%
                 }
             }
         }

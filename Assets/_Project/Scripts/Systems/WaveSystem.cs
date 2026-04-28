@@ -90,7 +90,11 @@ public class WaveSystem : ISystem
                 Health = config.Health,
                 Speed = config.Speed,
                 Color = config.Color,
-                Scale = config.Scale
+                Scale = config.Scale,
+
+                CanShoot = config.CanShoot,
+                ShootRange = config.ShootRange,
+                ShootCooldown = config.ShootCooldown
             };
 
             var view = GameObject.Instantiate(prefab);
